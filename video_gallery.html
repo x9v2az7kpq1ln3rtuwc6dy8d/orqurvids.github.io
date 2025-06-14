@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>x_x@dev:~$ video gallery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Mono', 'Monaco', 'Menlo', 'Consolas', 'Ubuntu Mono', monospace;
+            background: #111111;
+            color: #ffffff;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 40px;
+        }
+
+        .header {
+            margin-bottom: 60px;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+            font-size: 16px;
+            color: #666666;
+            margin-bottom: 40px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #00ff00;
+        }
+
+        .title-section {
+            margin-bottom: 60px;
+        }
+
+        .main-title {
+            font-size: 120px;
+            font-weight: 200;
+            color: #ffffff;
+            margin-bottom: 30px;
+            letter-spacing: -4px;
+            line-height: 0.9;
+        }
+
+        .subtitle {
+            color: #666666;
+            font-size: 20px;
+            font-weight: 300;
+            margin-bottom: 40px;
+        }
+
+        .terminal {
+            background: #1a1a1a;
+            border-radius: 20px;
+            margin-bottom: 60px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        .terminal-header {
+            background: #2a2a2a;
+            padding: 20px 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .terminal-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+        }
+
+        .terminal-dot.red { background: #ff605c; }
+        .terminal-dot.yellow { background: #ffbd44; }
+        .terminal-dot.green { background: #00ca4e; }
+
+        .terminal-content {
+            padding: 30px;
+            font-size: 16px;
+            line-height: 2;
+        }
+
+        .prompt {
+            color: #ffffff;
+            margin-right: 8px;
+        }
+
+        .command {
+            color: #ffffff;
+        }
+
+        .output {
+            color: #888888;
+            margin-left: 0;
+        }
+
+        .terminal-line {
+            margin-bottom: 8px;
+        }
+
+        .upload-section {
+            background: #1a1a1a;
+            border-radius: 20px;
+            padding: 60px;
+            margin-bottom: 60px;
+            border: 2px dashed #333333;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .upload-section:hover {
+            border-color: #555555;
+            background: #222222;
+        }
+
+        .upload-section.dragover {
+            border-color: #00ff00;
+            background: rgba(0,255,0,0.05);
+        }
+
+        .upload-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            color: #666666;
+        }
+
+        .upload-text {
+            color: #ffffff;
+            font-size: 24px;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .upload-hint {
+            color: #666666;
+            font-size: 18px;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 40px;
+        }
+
+        .project-card {
+            background: #1a1a1a;
+            border-radius: 20px;
+            padding: 40px;
+            transition: all 0.3s ease;
+            border: 1px solid #2a2a2a;
+        }
+
+        .project-card:hover {
+            transform: translateY(-8px);
+            border-color: #333333;
+        }
+
+        .project-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .project-icon {
+            width: 60px;
+            height: 60px;
+            background: #333333;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            font-size: 24px;
+        }
+
+        .project-title {
+            font-size: 24px;
+            font-weight: 500;
+            color: #ffffff;
+        }
+
+        .project-description {
+            color: #888888;
+            font-size: 16px;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 220px;
+            background: #000000;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .play-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255,255,255,0.9);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #000000;
+            font-size: 20px;
+        }
+
+        .play-overlay:hover {
+            background: rgba(255,255,255,1);
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        .project-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .video-size {
+            color: #666666;
+            font-size: 14px;
+        }
+
+        .delete-btn {
+            background: transparent;
+            color: #ff605c;
+            border: 1px solid #ff605c;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background: #ff605c;
+            color: #ffffff;
+        }
+
+        .project-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .tag {
+            background: #333333;
+            color: #cccccc;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 100px 20px;
+            color: #666666;
+        }
+
+        .empty-icon {
+            font-size: 80px;
+            margin-bottom: 30px;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-size: 24px;
+            color: #ffffff;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .empty-text {
+            font-size: 18px;
+            color: #666666;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 20px;
+            }
+            
+            .main-title {
+                font-size: 80px;
+            }
+            
+            .projects-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            
+            .upload-section {
+                padding: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="status">
+                <div class="status-dot"></div>
+                <span>online</span>
+            </div>
+
+            <div class="title-section">
+                <h1 class="main-title">video gallery</h1>
+                <p class="subtitle">upload, manage and stream your video collection.</p>
+            </div>
+        </div>
+
+        <div class="terminal">
+            <div class="terminal-header">
+                <div class="terminal-dot red"></div>
+                <div class="terminal-dot yellow"></div>
+                <div class="terminal-dot green"></div>
+            </div>
+            <div class="terminal-content">
+                <div class="terminal-line">
+                    <span class="prompt">x_x@dev:~$</span>
+                    <span class="command"> ls -la videos/</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output">total 0</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output">drwxr-xr-x 2 x_x x_x 4096 Jun 14 2025 .</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output">drwxr-xr-x 3 x_x x_x 4096 Jun 14 2025 ..</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="prompt">x_x@dev:~$</span>
+                    <span class="command"> echo "Ready for upload"</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="output">Ready for upload</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="prompt">x_x@dev:~$</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="upload-section" id="uploadArea">
+            <div class="upload-icon">📁</div>
+            <div class="upload-text">Upload Video Files</div>
+            <div class="upload-hint">Drag and drop or click to select files</div>
+            <input type="file" id="fileInput" accept="video/*" multiple style="display: none;">
+        </div>
+
+        <div id="videoGrid" class="projects-grid">
+            <div class="empty-state">
+                <div class="empty-icon">🎬</div>
+                <div class="empty-title">No Videos Yet</div>
+                <div class="empty-text">Upload your first video to get started</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let videos = [];
+        let videoIdCounter = 0;
+
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const videoGrid = document.getElementById('videoGrid');
+
+        // Load videos from memory on page load
+        loadVideos();
+
+        // Upload area click handler
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // File input change handler
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        // Drag and drop handlers
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        function handleFiles(files) {
+            Array.from(files).forEach(file => {
+                if (file.type.startsWith('video/')) {
+                    addVideo(file);
+                }
+            });
+        }
+
+        function addVideo(file) {
+            const videoId = videoIdCounter++;
+            const videoURL = URL.createObjectURL(file);
+            
+            // Convert file to base64 for storage
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const videoData = {
+                    id: videoId,
+                    name: file.name,
+                    size: formatFileSize(file.size),
+                    type: file.type,
+                    url: videoURL,
+                    dataUrl: e.target.result,
+                    uploadDate: new Date().toISOString()
+                };
+                
+                videos.push(videoData);
+                saveVideos();
+                renderVideos();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeVideo(id) {
+            const videoIndex = videos.findIndex(v => v.id === id);
+            if (videoIndex > -1) {
+                if (videos[videoIndex].url) {
+                    URL.revokeObjectURL(videos[videoIndex].url);
+                }
+                videos.splice(videoIndex, 1);
+                saveVideos();
+                renderVideos();
+            }
+        }
+
+        function saveVideos() {
+            // Store video metadata (without the blob URLs)
+            const videoData = videos.map(v => ({
+                id: v.id,
+                name: v.name,
+                size: v.size,
+                type: v.type,
+                dataUrl: v.dataUrl,
+                uploadDate: v.uploadDate
+            }));
+            
+            // Split large data into chunks to avoid storage limits
+            const chunks = [];
+            const chunkSize = 1000000; // 1MB chunks
+            
+            videoData.forEach((video, index) => {
+                const videoStr = JSON.stringify(video);
+                for (let i = 0; i < videoStr.length; i += chunkSize) {
+                    chunks.push({
+                        videoIndex: index,
+                        chunkIndex: Math.floor(i / chunkSize),
+                        data: videoStr.slice(i, i + chunkSize)
+                    });
+                }
+            });
+            
+            // Store in window object for persistence during session
+            window.videoData = videoData;
+            window.videoChunks = chunks;
+            
+            console.log(`Saved ${videos.length} videos to memory`);
+        }
+
+        function loadVideos() {
+            if (window.videoData) {
+                videos = window.videoData.map(video => {
+                    // Convert base64 back to blob URL
+                    const byteCharacters = atob(video.dataUrl.split(',')[1]);
+                    const byteNumbers = new Array(byteCharacters.length);
+                    for (let i = 0; i < byteCharacters.length; i++) {
+                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                    }
+                    const byteArray = new Uint8Array(byteNumbers);
+                    const blob = new Blob([byteArray], { type: video.type });
+                    const url = URL.createObjectURL(blob);
+                    
+                    return {
+                        ...video,
+                        url: url
+                    };
+                });
+                
+                // Update counter
+                videoIdCounter = videos.length > 0 ? Math.max(...videos.map(v => v.id)) + 1 : 0;
+                renderVideos();
+            }
+        }
+
+        function getVideoType(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const types = {
+                'mp4': 'MP4',
+                'webm': 'WebM',
+                'mov': 'MOV',
+                'avi': 'AVI',
+                'mkv': 'MKV',
+                'flv': 'FLV',
+                'wmv': 'WMV'
+            };
+            return types[ext] || 'Video';
+        }
+
+        function renderVideos() {
+            if (videos.length === 0) {
+                videoGrid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🎬</div>
+                        <div class="empty-title">No Videos Yet</div>
+                        <div class="empty-text">Upload your first video to get started</div>
+                    </div>
+                `;
+                return;
+            }
+
+            videoGrid.innerHTML = videos.map((video, index) => {
+                const videoType = getVideoType(video.name);
+                const uploadDate = new Date(video.uploadDate).toLocaleDateString();
+                
+                return `
+                    <div class="project-card">
+                        <div class="project-header">
+                            <div class="project-icon">🎥</div>
+                            <div class="project-title">${video.name.replace(/\.[^/.]+$/, '')}</div>
+                        </div>
+                        <div class="project-description">
+                            Video uploaded on ${uploadDate}. Ready for streaming and playback with full quality preservation.
+                        </div>
+                        <div class="video-container">
+                            <video muted preload="metadata">
+                                <source src="${video.url}" type="${video.type}">
+                                Your browser does not support the video tag.
+                            </video>
+                            <div class="play-overlay" onclick="playVideo(this)">▶</div>
+                        </div>
+                        <div class="project-footer">
+                            <span class="video-size">${video.size}</span>
+                            <button class="delete-btn" onclick="removeVideo(${video.id})">Delete</button>
+                        </div>
+                        <div class="project-tags">
+                            <span class="tag">${videoType}</span>
+                            <span class="tag">Streaming</span>
+                            <span class="tag">Media</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function playVideo(overlay) {
+            const video = overlay.previousElementSibling;
+            if (video.paused) {
+                video.play();
+                overlay.style.display = 'none';
+                video.controls = true;
+                video.addEventListener('pause', () => {
+                    overlay.style.display = 'flex';
+                    video.controls = false;
+                });
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Handle page refresh - warn user about losing videos
+        window.addEventListener('beforeunload', function (e) {
+            if (videos.length > 0) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+    </script>
+</body>
+</html>
